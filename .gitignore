@@ -6,5 +6,6 @@
 .nx/migrate-runs
 .angular
 node_modules/
+dist/
 
 __screenshots__/
