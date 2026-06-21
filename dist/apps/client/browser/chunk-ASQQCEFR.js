@@ -1,0 +1,1 @@
+import"./chunk-2NFLSA4Y.js";var t=[{path:"",loadComponent:()=>import("./chunk-UNU23YN4.js").then(o=>o.MockTestsComponent)},{path:":id",loadComponent:()=>import("./chunk-ER5ZVZXZ.js").then(o=>o.TestSessionComponent)}];export{t as mockTestsRoutes};
