@@ -1,5 +1,5 @@
 # PrepForge
-
+A daily-use platform to help engineers prepare for technical interviews across Angular, JavaScript, System Design, and more.
 PrepForge is an Nx monorepo containing a full-stack interview prep platform with an Angular client and a NestJS server backend.
 
 ## Overview
