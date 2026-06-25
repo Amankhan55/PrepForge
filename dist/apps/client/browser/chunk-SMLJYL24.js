@@ -1,1 +1,0 @@
-import"./chunk-2NFLSA4Y.js";var o=[{path:":category",loadComponent:()=>import("./chunk-PCQQWLTI.js").then(t=>t.QuestionsListComponent)},{path:":category/:id",loadComponent:()=>import("./chunk-352TA66N.js").then(t=>t.QuestionDetailComponent)},{path:"",redirectTo:"angular",pathMatch:"full"}];export{o as questionsRoutes};

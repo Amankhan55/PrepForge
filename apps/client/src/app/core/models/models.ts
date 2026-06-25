@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   streak: number;
+  role: string;
 }
 
 export interface AuthResponse {

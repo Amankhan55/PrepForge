@@ -22,7 +22,7 @@ export class App {
     { label: 'Mock Tests', icon: '⏱', route: '/mock-tests', id: 'nav-mock-tests' },
     { label: 'Notes', icon: '✎', route: '/notes', id: 'nav-notes' },
     { label: 'Analytics', icon: '◎', route: '/analytics', id: 'nav-analytics' },
-    { label: 'Admin Panel', icon: '⚙', route: '/admin', id: 'nav-admin' },
+    { label: 'Admin Panel', icon: '⚙', route: '/admin', id: 'nav-admin', adminOnly: true },
   ];
 
   constructor(

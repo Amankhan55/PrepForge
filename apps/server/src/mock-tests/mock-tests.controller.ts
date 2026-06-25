@@ -40,4 +40,12 @@ export class MockTestsController {
   scoreTrend(@CurrentUser() user: { userId: string }) {
     return this.mockTestsService.getScoreTrend(user.userId);
   }
+
+  @Get(':id')
+  findOne(
+    @CurrentUser() user: { userId: string },
+    @Param('id') id: string,
+  ) {
+    return this.mockTestsService.findOne(user.userId, id);
+  }
 }

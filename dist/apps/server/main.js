@@ -29,10 +29,10 @@ const app_service_1 = __webpack_require__(8);
 const auth_module_1 = __webpack_require__(9);
 const users_module_1 = __webpack_require__(25);
 const questions_module_1 = __webpack_require__(26);
-const progress_module_1 = __webpack_require__(31);
-const mock_tests_module_1 = __webpack_require__(35);
-const notes_module_1 = __webpack_require__(39);
-const analytics_module_1 = __webpack_require__(43);
+const progress_module_1 = __webpack_require__(33);
+const mock_tests_module_1 = __webpack_require__(37);
+const notes_module_1 = __webpack_require__(41);
+const analytics_module_1 = __webpack_require__(45);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -182,7 +182,7 @@ module.exports = require("@nestjs/passport");
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const tslib_1 = __webpack_require__(1);
@@ -196,57 +196,103 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    register(dto) {
-        return this.authService.register(dto);
+    async register(dto, res) {
+        const { user, accessToken, refreshToken } = await this.authService.register(dto);
+        this.setCookies(res, accessToken, refreshToken);
+        return { user };
     }
-    login(dto) {
-        return this.authService.login(dto);
+    async login(dto, res) {
+        const { user, accessToken, refreshToken } = await this.authService.login(dto);
+        this.setCookies(res, accessToken, refreshToken);
+        return { user };
     }
-    refresh(req) {
+    async refresh(req, res) {
         const authHeader = req.headers.authorization;
-        const refreshToken = authHeader?.split(' ')[1];
-        const userId = req.body.userId;
-        return this.authService.refresh(userId, refreshToken);
+        const headerToken = authHeader?.split(' ')[1];
+        const refreshToken = req.cookies?.['refresh_token'] || headerToken;
+        if (!refreshToken) {
+            throw new common_1.UnauthorizedException('Refresh token is missing');
+        }
+        const { newTokens } = await this.authService.refreshWithToken(refreshToken);
+        this.setCookies(res, newTokens.accessToken, newTokens.refreshToken);
+        return { success: true };
     }
-    logout(user) {
-        return this.authService.logout(user.userId);
+    async logout(user, res) {
+        await this.authService.logout(user.userId);
+        this.clearCookies(res);
     }
     me(user) {
         return user;
+    }
+    setCookies(res, accessToken, refreshToken) {
+        const isProd = process.env['NODE_ENV'] === 'production';
+        res.cookie('access_token', accessToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 15 * 60 * 1000, // 15 mins
+        });
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+    }
+    clearCookies(res) {
+        const isProd = process.env['NODE_ENV'] === 'production';
+        res.clearCookie('access_token', {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: 'lax',
+            path: '/',
+        });
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: 'lax',
+            path: '/',
+        });
     }
 };
 exports.AuthController = AuthController;
 tslib_1.__decorate([
     (0, common_1.Post)('register'),
     tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__param(1, (0, common_1.Res)({ passthrough: true })),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof auth_dto_1.RegisterDto !== "undefined" && auth_dto_1.RegisterDto) === "function" ? _b : Object]),
-    tslib_1.__metadata("design:returntype", void 0)
+    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof auth_dto_1.RegisterDto !== "undefined" && auth_dto_1.RegisterDto) === "function" ? _b : Object, typeof (_c = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 tslib_1.__decorate([
     (0, common_1.Post)('login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__param(1, (0, common_1.Res)({ passthrough: true })),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof auth_dto_1.LoginDto !== "undefined" && auth_dto_1.LoginDto) === "function" ? _c : Object]),
-    tslib_1.__metadata("design:returntype", void 0)
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof auth_dto_1.LoginDto !== "undefined" && auth_dto_1.LoginDto) === "function" ? _d : Object, typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 tslib_1.__decorate([
     (0, common_1.Post)('refresh'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     tslib_1.__param(0, (0, common_1.Req)()),
+    tslib_1.__param(1, (0, common_1.Res)({ passthrough: true })),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _d : Object]),
-    tslib_1.__metadata("design:returntype", void 0)
+    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _f : Object, typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], AuthController.prototype, "refresh", null);
 tslib_1.__decorate([
     (0, common_1.Delete)('logout'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     tslib_1.__param(0, (0, current_user_decorator_1.CurrentUser)()),
+    tslib_1.__param(1, (0, common_1.Res)({ passthrough: true })),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
-    tslib_1.__metadata("design:returntype", void 0)
+    tslib_1.__metadata("design:paramtypes", [Object, typeof (_h = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _h : Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 tslib_1.__decorate([
     (0, common_1.Post)('me'),
@@ -294,10 +340,12 @@ let AuthService = class AuthService {
         if (existing)
             throw new common_1.ConflictException('Email already registered');
         const passwordHash = await bcrypt.hash(dto.password, 12);
-        const user = await this.usersService.create(dto.name, dto.email, passwordHash);
-        const tokens = await this.generateTokens(user._id.toString(), user.email);
+        // Assign admin role if email is admin@prepforge.com or explicitly passed as admin
+        const role = (dto.role === 'admin' || dto.email.toLowerCase() === 'admin@prepforge.com') ? 'admin' : 'user';
+        const user = await this.usersService.create(dto.name, dto.email, passwordHash, role);
+        const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
         await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
-        return { user: { id: user._id.toString(), name: user.name, email: user.email }, ...tokens };
+        return { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role }, ...tokens };
     }
     async login(dto) {
         const user = await this.usersService.findByEmail(dto.email);
@@ -306,9 +354,9 @@ let AuthService = class AuthService {
         const valid = await bcrypt.compare(dto.password, user.passwordHash);
         if (!valid)
             throw new common_1.UnauthorizedException('Invalid credentials');
-        const tokens = await this.generateTokens(user._id.toString(), user.email);
+        const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
         await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
-        return { user: { id: user._id.toString(), name: user.name, email: user.email }, ...tokens };
+        return { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role }, ...tokens };
     }
     async refresh(userId, refreshToken) {
         const user = await this.usersService.findById(userId);
@@ -317,15 +365,35 @@ let AuthService = class AuthService {
         const match = await bcrypt.compare(refreshToken, user.refreshToken);
         if (!match)
             throw new common_1.UnauthorizedException();
-        const tokens = await this.generateTokens(user._id.toString(), user.email);
+        const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
         await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
         return tokens;
+    }
+    async refreshWithToken(refreshToken) {
+        let payload;
+        try {
+            payload = await this.jwtService.verifyAsync(refreshToken, {
+                secret: this.config.get('JWT_REFRESH_SECRET'),
+            });
+        }
+        catch (err) {
+            throw new common_1.UnauthorizedException('Invalid or expired refresh token');
+        }
+        const userId = payload.sub;
+        const user = await this.usersService.findById(userId);
+        if (!user || !user.refreshToken)
+            throw new common_1.UnauthorizedException('User session not found');
+        const match = await bcrypt.compare(refreshToken, user.refreshToken);
+        if (!match)
+            throw new common_1.UnauthorizedException('Session mismatch');
+        const newTokens = await this.generateTokens(user._id.toString(), user.email, user.role);
+        return { userId, newTokens };
     }
     async logout(userId) {
         await this.usersService.updateRefreshToken(userId, null);
     }
-    async generateTokens(userId, email) {
-        const payload = { sub: userId, email };
+    async generateTokens(userId, email, role) {
+        const payload = { sub: userId, email, role };
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(payload, {
                 secret: this.config.get('JWT_SECRET'),
@@ -372,8 +440,8 @@ let UsersService = class UsersService {
     constructor(userModel) {
         this.userModel = userModel;
     }
-    async create(name, email, passwordHash) {
-        return this.userModel.create({ name, email, passwordHash });
+    async create(name, email, passwordHash, role = 'user') {
+        return this.userModel.create({ name, email, passwordHash, role });
     }
     async findByEmail(email) {
         return this.userModel.findOne({ email }).exec();
@@ -432,6 +500,10 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", String)
 ], User.prototype, "refreshToken", void 0);
 tslib_1.__decorate([
+    (0, mongoose_1.Prop)({ required: true, enum: ['user', 'admin'], default: 'user' }),
+    tslib_1.__metadata("design:type", String)
+], User.prototype, "role", void 0);
+tslib_1.__decorate([
     (0, mongoose_1.Prop)({ default: 0 }),
     tslib_1.__metadata("design:type", Number)
 ], User.prototype, "streak", void 0);
@@ -472,6 +544,11 @@ tslib_1.__decorate([
     (0, class_validator_1.MinLength)(8),
     tslib_1.__metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
+tslib_1.__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    tslib_1.__metadata("design:type", String)
+], RegisterDto.prototype, "role", void 0);
 class LoginDto {
 }
 exports.LoginDto = LoginDto;
@@ -536,16 +613,25 @@ const common_1 = __webpack_require__(4);
 const passport_1 = __webpack_require__(11);
 const passport_jwt_1 = __webpack_require__(24);
 const config_1 = __webpack_require__(5);
+const cookieExtractor = (req) => {
+    if (req && req.cookies) {
+        return req.cookies['access_token'] || null;
+    }
+    return null;
+};
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt') {
     constructor(config) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                cookieExtractor,
+                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ]),
             ignoreExpiration: false,
             secretOrKey: config.get('JWT_SECRET'),
         });
     }
     async validate(payload) {
-        return { userId: payload.sub, email: payload.email };
+        return { userId: payload.sub, email: payload.email, role: payload.role };
     }
 };
 exports.JwtStrategy = JwtStrategy;
@@ -624,6 +710,8 @@ const common_1 = __webpack_require__(4);
 const questions_service_1 = __webpack_require__(28);
 const questions_dto_1 = __webpack_require__(30);
 const jwt_auth_guard_1 = __webpack_require__(21);
+const roles_guard_1 = __webpack_require__(31);
+const roles_decorator_1 = __webpack_require__(32);
 let QuestionsController = class QuestionsController {
     constructor(questionsService) {
         this.questionsService = questionsService;
@@ -671,6 +759,7 @@ tslib_1.__decorate([
 ], QuestionsController.prototype, "findOne", null);
 tslib_1.__decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('admin'),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof questions_dto_1.CreateQuestionDto !== "undefined" && questions_dto_1.CreateQuestionDto) === "function" ? _c : Object]),
@@ -678,6 +767,7 @@ tslib_1.__decorate([
 ], QuestionsController.prototype, "create", null);
 tslib_1.__decorate([
     (0, common_1.Put)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__param(1, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
@@ -686,6 +776,7 @@ tslib_1.__decorate([
 ], QuestionsController.prototype, "update", null);
 tslib_1.__decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
@@ -694,7 +785,7 @@ tslib_1.__decorate([
 ], QuestionsController.prototype, "delete", null);
 exports.QuestionsController = QuestionsController = tslib_1.__decorate([
     (0, common_1.Controller)('questions'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof questions_service_1.QuestionsService !== "undefined" && questions_service_1.QuestionsService) === "function" ? _a : Object])
 ], QuestionsController);
 
@@ -913,14 +1004,65 @@ tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RolesGuard = void 0;
+const tslib_1 = __webpack_require__(1);
+const common_1 = __webpack_require__(4);
+const core_1 = __webpack_require__(2);
+const roles_decorator_1 = __webpack_require__(32);
+let RolesGuard = class RolesGuard {
+    constructor(reflector) {
+        this.reflector = reflector;
+    }
+    canActivate(context) {
+        const requiredRoles = this.reflector.getAllAndOverride(roles_decorator_1.ROLES_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (!requiredRoles) {
+            return true;
+        }
+        const { user } = context.switchToHttp().getRequest();
+        if (!user) {
+            return false;
+        }
+        return requiredRoles.includes(user.role);
+    }
+};
+exports.RolesGuard = RolesGuard;
+exports.RolesGuard = RolesGuard = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object])
+], RolesGuard);
+
+
+/***/ }),
+/* 32 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Roles = exports.ROLES_KEY = void 0;
+const common_1 = __webpack_require__(4);
+exports.ROLES_KEY = 'roles';
+const Roles = (...roles) => (0, common_1.SetMetadata)(exports.ROLES_KEY, roles);
+exports.Roles = Roles;
+
+
+/***/ }),
+/* 33 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProgressModule = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
-const progress_controller_1 = __webpack_require__(32);
-const progress_service_1 = __webpack_require__(33);
-const user_progress_schema_1 = __webpack_require__(34);
+const progress_controller_1 = __webpack_require__(34);
+const progress_service_1 = __webpack_require__(35);
+const user_progress_schema_1 = __webpack_require__(36);
 let ProgressModule = class ProgressModule {
 };
 exports.ProgressModule = ProgressModule;
@@ -935,7 +1077,7 @@ exports.ProgressModule = ProgressModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -944,7 +1086,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProgressController = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
-const progress_service_1 = __webpack_require__(33);
+const progress_service_1 = __webpack_require__(35);
 const jwt_auth_guard_1 = __webpack_require__(21);
 const current_user_decorator_1 = __webpack_require__(22);
 let ProgressController = class ProgressController {
@@ -1003,7 +1145,7 @@ exports.ProgressController = ProgressController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1014,7 +1156,7 @@ const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
 const mongoose_2 = __webpack_require__(17);
-const user_progress_schema_1 = __webpack_require__(34);
+const user_progress_schema_1 = __webpack_require__(36);
 let ProgressService = class ProgressService {
     constructor(progressModel) {
         this.progressModel = progressModel;
@@ -1059,7 +1201,7 @@ exports.ProgressService = ProgressService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1100,7 +1242,7 @@ exports.UserProgressSchema.index({ userId: 1, questionId: 1 }, { unique: true })
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1109,9 +1251,9 @@ exports.MockTestsModule = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
-const mock_tests_controller_1 = __webpack_require__(36);
-const mock_tests_service_1 = __webpack_require__(37);
-const mock_test_schema_1 = __webpack_require__(38);
+const mock_tests_controller_1 = __webpack_require__(38);
+const mock_tests_service_1 = __webpack_require__(39);
+const mock_test_schema_1 = __webpack_require__(40);
 const questions_module_1 = __webpack_require__(26);
 let MockTestsModule = class MockTestsModule {
 };
@@ -1130,7 +1272,7 @@ exports.MockTestsModule = MockTestsModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1139,7 +1281,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MockTestsController = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
-const mock_tests_service_1 = __webpack_require__(37);
+const mock_tests_service_1 = __webpack_require__(39);
 const jwt_auth_guard_1 = __webpack_require__(21);
 const current_user_decorator_1 = __webpack_require__(22);
 let MockTestsController = class MockTestsController {
@@ -1157,6 +1299,9 @@ let MockTestsController = class MockTestsController {
     }
     scoreTrend(user) {
         return this.mockTestsService.getScoreTrend(user.userId);
+    }
+    findOne(user, id) {
+        return this.mockTestsService.findOne(user.userId, id);
     }
 };
 exports.MockTestsController = MockTestsController;
@@ -1191,6 +1336,14 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MockTestsController.prototype, "scoreTrend", null);
+tslib_1.__decorate([
+    (0, common_1.Get)(':id'),
+    tslib_1.__param(0, (0, current_user_decorator_1.CurrentUser)()),
+    tslib_1.__param(1, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MockTestsController.prototype, "findOne", null);
 exports.MockTestsController = MockTestsController = tslib_1.__decorate([
     (0, common_1.Controller)('mock-tests'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
@@ -1199,7 +1352,7 @@ exports.MockTestsController = MockTestsController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1210,7 +1363,7 @@ const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
 const mongoose_2 = __webpack_require__(17);
-const mock_test_schema_1 = __webpack_require__(38);
+const mock_test_schema_1 = __webpack_require__(40);
 const questions_service_1 = __webpack_require__(28);
 let MockTestsService = class MockTestsService {
     constructor(mockTestModel, questionsService) {
@@ -1241,15 +1394,73 @@ let MockTestsService = class MockTestsService {
         }).populate('questions').exec();
         if (!test)
             throw new common_1.NotFoundException('Test not found');
-        // Simple scoring: count correct answers (for MCQ; full impl per question type)
-        const score = Object.keys(answers).length;
+        // Grade each descriptive answer using keyword-matching heuristics
+        let score = 0;
+        const questionsList = (test.questions || []);
+        for (const q of questionsList) {
+            const userAnswer = answers[q._id.toString()];
+            if (userAnswer && this.gradeAnswer(userAnswer, q.answer, q.tags || [])) {
+                score++;
+            }
+        }
         return this.mockTestModel.findByIdAndUpdate(testId, {
             answers,
             score,
             timeTakenSeconds,
             status: 'completed',
             completedAt: new Date(),
-        }, { new: true }).exec();
+        }, { new: true }).populate('questions').exec();
+    }
+    gradeAnswer(userAnswer, correctAnswer, tags) {
+        if (!userAnswer || userAnswer.trim().length < 5)
+            return false;
+        const cleanUser = userAnswer.toLowerCase();
+        // 1. Check for matches against the question tags (case-insensitive)
+        const matchedTags = tags.filter(tag => cleanUser.includes(tag.toLowerCase()));
+        // 2. Extract significant keywords from the correct answer (length > 4, omitting common stop words)
+        const stopWords = new Set([
+            'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'as', 'at',
+            'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+            'can', 'did', 'do', 'does', 'doing', 'down', 'during', 'each', 'few', 'for', 'from', 'further',
+            'had', 'has', 'have', 'having', 'he', 'her', 'here', 'hers', 'him', 'his', 'how', 'if', 'in',
+            'into', 'is', 'it', 'its', 'me', 'more', 'most', 'my', 'myself', 'no', 'nor', 'not', 'of', 'off',
+            'on', 'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'same',
+            'she', 'should', 'so', 'some', 'such', 'than', 'that', 'the', 'their', 'theirs', 'them', 'themselves',
+            'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up',
+            'very', 'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while', 'who', 'whom', 'why',
+            'with', 'would', 'you', 'your', 'yours', 'yourself', 'yourselves'
+        ]);
+        const correctWords = correctAnswer
+            .toLowerCase()
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, ' ')
+            .split(/\s+/)
+            .filter(w => w.length > 4 && !stopWords.has(w));
+        const uniqueKeywords = Array.from(new Set(correctWords));
+        // 3. Count matching keywords in the user's answer
+        const matchedKeywords = uniqueKeywords.filter(kw => cleanUser.includes(kw));
+        const tagMatchCount = matchedTags.length;
+        const keywordMatchCount = matchedKeywords.length;
+        const keywordMatchRatio = uniqueKeywords.length > 0 ? keywordMatchCount / uniqueKeywords.length : 0;
+        // Heuristics:
+        // - At least 1 tag matched AND at least 2 significant keywords matched
+        // - OR, at least 4 significant keywords matched
+        // - OR, at least 25% of the unique keywords matched (minimum of 2)
+        if (tagMatchCount >= 1 && keywordMatchCount >= 2)
+            return true;
+        if (keywordMatchCount >= 4)
+            return true;
+        if (keywordMatchRatio >= 0.25 && keywordMatchCount >= 2)
+            return true;
+        return false;
+    }
+    async findOne(userId, testId) {
+        const test = await this.mockTestModel.findOne({
+            _id: testId,
+            userId: new mongoose_2.Types.ObjectId(userId),
+        }).populate('questions').exec();
+        if (!test)
+            throw new common_1.NotFoundException('Test session not found');
+        return test;
     }
     findHistory(userId) {
         return this.mockTestModel
@@ -1277,7 +1488,7 @@ exports.MockTestsService = MockTestsService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1342,7 +1553,7 @@ exports.MockTestSchema.index({ userId: 1, createdAt: -1 });
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1351,9 +1562,9 @@ exports.NotesModule = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
-const notes_controller_1 = __webpack_require__(40);
-const notes_service_1 = __webpack_require__(41);
-const note_schema_1 = __webpack_require__(42);
+const notes_controller_1 = __webpack_require__(42);
+const notes_service_1 = __webpack_require__(43);
+const note_schema_1 = __webpack_require__(44);
 let NotesModule = class NotesModule {
 };
 exports.NotesModule = NotesModule;
@@ -1367,7 +1578,7 @@ exports.NotesModule = NotesModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1376,7 +1587,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NotesController = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
-const notes_service_1 = __webpack_require__(41);
+const notes_service_1 = __webpack_require__(43);
 const jwt_auth_guard_1 = __webpack_require__(21);
 const current_user_decorator_1 = __webpack_require__(22);
 let NotesController = class NotesController {
@@ -1450,7 +1661,7 @@ exports.NotesController = NotesController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1461,7 +1672,7 @@ const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
 const mongoose_2 = __webpack_require__(17);
-const note_schema_1 = __webpack_require__(42);
+const note_schema_1 = __webpack_require__(44);
 let NotesService = class NotesService {
     constructor(noteModel) {
         this.noteModel = noteModel;
@@ -1505,7 +1716,7 @@ exports.NotesService = NotesService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1543,7 +1754,7 @@ exports.NoteSchema.index({ title: 'text', content: 'text' });
 
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1552,12 +1763,12 @@ exports.AnalyticsModule = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
 const mongoose_1 = __webpack_require__(6);
-const analytics_controller_1 = __webpack_require__(44);
-const analytics_service_1 = __webpack_require__(45);
-const progress_module_1 = __webpack_require__(31);
-const mock_tests_module_1 = __webpack_require__(35);
+const analytics_controller_1 = __webpack_require__(46);
+const analytics_service_1 = __webpack_require__(47);
+const progress_module_1 = __webpack_require__(33);
+const mock_tests_module_1 = __webpack_require__(37);
 const users_module_1 = __webpack_require__(25);
-const user_progress_schema_1 = __webpack_require__(34);
+const user_progress_schema_1 = __webpack_require__(36);
 let AnalyticsModule = class AnalyticsModule {
 };
 exports.AnalyticsModule = AnalyticsModule;
@@ -1576,7 +1787,7 @@ exports.AnalyticsModule = AnalyticsModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1585,7 +1796,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AnalyticsController = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
-const analytics_service_1 = __webpack_require__(45);
+const analytics_service_1 = __webpack_require__(47);
 const jwt_auth_guard_1 = __webpack_require__(21);
 const current_user_decorator_1 = __webpack_require__(22);
 let AnalyticsController = class AnalyticsController {
@@ -1632,7 +1843,7 @@ exports.AnalyticsController = AnalyticsController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1641,11 +1852,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AnalyticsService = void 0;
 const tslib_1 = __webpack_require__(1);
 const common_1 = __webpack_require__(4);
-const progress_service_1 = __webpack_require__(33);
-const mock_tests_service_1 = __webpack_require__(37);
+const progress_service_1 = __webpack_require__(35);
+const mock_tests_service_1 = __webpack_require__(39);
 const users_service_1 = __webpack_require__(16);
 const mongoose_1 = __webpack_require__(6);
-const user_progress_schema_1 = __webpack_require__(34);
+const user_progress_schema_1 = __webpack_require__(36);
 const mongoose_2 = __webpack_require__(17);
 let AnalyticsService = class AnalyticsService {
     constructor(progressService, mockTestsService, usersService, progressModel) {
@@ -1705,7 +1916,7 @@ exports.AnalyticsService = AnalyticsService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ ((module) => {
 
 module.exports = require("cookie-parser");
@@ -1748,7 +1959,7 @@ const tslib_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
 const app_module_1 = __webpack_require__(3);
 const common_1 = __webpack_require__(4);
-const cookie_parser_1 = tslib_1.__importDefault(__webpack_require__(46));
+const cookie_parser_1 = tslib_1.__importDefault(__webpack_require__(48));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.setGlobalPrefix('api');

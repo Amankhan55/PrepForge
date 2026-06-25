@@ -17,6 +17,9 @@ export class User {
   @Prop({ default: null })
   refreshToken: string | null;
 
+  @Prop({ required: true, enum: ['user', 'admin'], default: 'user' })
+  role: string;
+
   @Prop({ default: 0 })
   streak: number;
 

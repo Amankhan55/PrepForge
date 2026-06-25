@@ -178,9 +178,8 @@ export class TestSessionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
-    this.http.get<MockTest>(`http://localhost:3000/api/mock-tests/history`).subscribe({
-      next: (tests: any) => {
-        const test = Array.isArray(tests) ? tests.find((t: any) => t._id === id) : null;
+    this.mockTestsApi.getTest(id).subscribe({
+      next: (test: MockTest) => {
         if (test) {
           this.test.set(test);
           this.questions.set(test.questions || []);
@@ -188,6 +187,9 @@ export class TestSessionComponent implements OnInit, OnDestroy {
           this.startTimer();
         }
       },
+      error: () => {
+        this.router.navigate(['/mock-tests']);
+      }
     });
   }
 
