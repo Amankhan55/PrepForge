@@ -131,28 +131,27 @@ import { ProgressSummary } from '../../core/models/models';
   styles: [`
     .dashboard { padding: 36px; max-width: 1200px; }
     .dash-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; }
-    .dash-greeting { font-size:2rem; font-weight:900; color:white; margin-bottom:6px; letter-spacing:-0.02em; }
+    .dash-greeting { font-size:2rem; font-weight:900; color:var(--color-text); margin-bottom:6px; letter-spacing:-0.02em; }
     .dash-sub { color:var(--color-text-muted); font-size:0.95rem; }
     .streak-badge {
-      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.12));
-      border:1px solid rgba(245,158,11,0.25);
+      background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1));
+      border:1px solid rgba(245,158,11,0.2);
       color:var(--color-warning);
       border-radius:20px;
       padding:8px 18px;
       font-weight:700;
       font-size:0.9rem;
-      box-shadow: 0 0 15px rgba(245,158,11,0.1);
       backdrop-filter: blur(8px);
     }
 
     .stats-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:36px; }
     .stat-card { padding:22px; text-align:center; cursor: default; }
-    .stat-card:hover { transform:translateY(-4px); border-color: rgba(255, 255, 255, 0.12); }
-    .stat-card.accent:hover { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.25); }
-    .stat-card.success:hover { box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.25); }
-    .stat-card.warning:hover { box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.25); }
-    .stat-card.info:hover { box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.25); }
-    .stat-card.purple:hover { box-shadow: 0 10px 30px rgba(217, 70, 239, 0.15); border-color: rgba(217, 70, 239, 0.25); }
+    .stat-card:hover { transform:translateY(-2px); border-color: var(--color-text-muted); }
+    .stat-card.accent:hover { border-color: var(--color-angular); }
+    .stat-card.success:hover { border-color: var(--color-success); }
+    .stat-card.warning:hover { border-color: var(--color-warning); }
+    .stat-card.info:hover { border-color: var(--color-system); }
+    .stat-card.purple:hover { border-color: var(--color-text); }
     .stat-icon { font-size:1.6rem; margin-bottom:8px; }
     .stat-value { font-size:2.25rem; font-weight:900; margin-bottom:4px; letter-spacing: -0.02em; }
     .stat-label { font-size:0.75rem; color:var(--color-text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
@@ -160,27 +159,27 @@ import { ProgressSummary } from '../../core/models/models';
     .section-title { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--color-text-muted); margin-bottom:16px; padding-left: 2px; }
 
     .quick-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:36px; }
-    .qa-card { display:flex; align-items:center; gap:16px; padding:20px; text-decoration:none; transition:all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; }
-    .qa-card:hover { transform:translateY(-4px); border-color: rgba(255, 255, 255, 0.12); }
+    .qa-card { display:flex; align-items:center; gap:16px; padding:20px; text-decoration:none; transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; }
+    .qa-card:hover { transform:translateY(-2px); border-color: var(--color-text-muted); }
     .qa-icon-wrap { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .qa-icon { font-size:1.35rem; }
     .qa-content { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
-    .qa-label { font-weight:700; font-size:0.95rem; color:white; }
+    .qa-label { font-weight:700; font-size:0.95rem; color:var(--color-text); }
     .qa-desc { font-size:0.75rem; color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .qa-arrow { color:var(--color-text-muted); font-size: 1.1rem; transition:all 0.25s; padding-right: 4px; }
-    .qa-card:hover .qa-arrow { transform:translateX(4px); color: white; }
+    .qa-arrow { color:var(--color-text-muted); font-size: 1.1rem; transition:all 0.2s; padding-right: 4px; }
+    .qa-card:hover .qa-arrow { transform:translateX(4px); color: var(--color-text); }
 
-    .qa-card.angular:hover { box-shadow: 0 10px 30px rgba(255, 62, 108, 0.15); border-color: rgba(255, 62, 108, 0.3); }
-    .qa-card.js:hover { box-shadow: 0 10px 30px rgba(247, 223, 30, 0.12); border-color: rgba(247, 223, 30, 0.3); }
-    .qa-card.system:hover { box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.3); }
-    .qa-card.mock:hover { box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); }
-    .qa-card.notes:hover { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); }
-    .qa-card.analytics-card:hover { box-shadow: 0 10px 30px rgba(217, 70, 239, 0.15); border-color: rgba(217, 70, 239, 0.3); }
+    .qa-card.angular:hover { border-color: var(--color-angular); }
+    .qa-card.js:hover { border-color: var(--color-js); }
+    .qa-card.system:hover { border-color: var(--color-system); }
+    .qa-card.mock:hover { border-color: var(--color-success); }
+    .qa-card.notes:hover { border-color: var(--color-text-muted); }
+    .qa-card.analytics-card:hover { border-color: var(--color-text); }
 
     .progress-section { display:flex; align-items:center; gap:20px; padding: 20px 24px; }
-    .progress-bar-wrap { flex:1; height:10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.04); border-radius:6px; overflow:hidden; }
-    .progress-bar { height:100%; background:linear-gradient(90deg,var(--color-accent),var(--color-accent-light)); border-radius:6px; transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(167, 139, 250, 0.4); }
-    .progress-text { font-size:0.875rem; font-weight: 600; color:var(--color-accent-light); white-space:nowrap; text-shadow: 0 0 10px rgba(167, 139, 250, 0.2); }
+    .progress-bar-wrap { flex:1; height:10px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius:6px; overflow:hidden; }
+    .progress-bar { height:100%; background: var(--color-accent); border-radius:6px; transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    .progress-text { font-size:0.875rem; font-weight: 600; color:var(--color-text); white-space:nowrap; }
 
     @media (max-width:980px) { .stats-grid { grid-template-columns:repeat(3,1fr); } .quick-actions { grid-template-columns:1fr 1fr; } }
     @media (max-width:650px) { .stats-grid { grid-template-columns:1fr 1fr; } .quick-actions { grid-template-columns:1fr; } .dash-header { flex-direction:column; gap:16px; } }

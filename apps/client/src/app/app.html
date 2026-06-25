@@ -36,6 +36,14 @@
       </nav>
 
       <div class="sidebar-footer">
+        <button class="theme-toggle-btn" (click)="toggleTheme()" title="Toggle Dark/Light Mode" id="btn-theme-toggle">
+          @if (theme() === 'dark') {
+            <span>☼</span><span class="theme-toggle-text">Light Mode</span>
+          } @else {
+            <span>☾</span><span class="theme-toggle-text">Dark Mode</span>
+          }
+        </button>
+
         @if (authService.user(); as user) {
           <div class="user-card">
             <div class="avatar">{{ user.name[0].toUpperCase() }}</div>

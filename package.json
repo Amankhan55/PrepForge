@@ -3,7 +3,8 @@
     "seed": "ts-node -e \"process.env.TS_NODE_FILES = 'true'\" -r dotenv/config apps/server/src/seed.ts dotenv_config_path=apps/server/.env",
     "seed:direct": "npx ts-node --project apps/server/tsconfig.app.json apps/server/src/seed.ts",
     "dev:server": "npx nx serve server",
-    "dev:client": "npx nx serve client"
+    "dev:client": "npx nx serve client",
+    "dev": "npx nx run-many -t serve -p server client"
   },
   "devDependencies": {
     "@angular-devkit/core": "~21.2.0",
