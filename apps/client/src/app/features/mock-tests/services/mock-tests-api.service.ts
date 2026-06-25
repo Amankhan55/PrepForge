@@ -16,6 +16,10 @@ export class MockTestsApiService {
     return this.http.put<MockTest>(`${this.apiUrl}/${id}/submit`, { answers, timeTakenSeconds });
   }
 
+  getTest(id: string): Observable<MockTest> {
+    return this.http.get<MockTest>(`${this.apiUrl}/${id}`);
+  }
+
   getHistory(): Observable<MockTest[]> {
     return this.http.get<MockTest[]>(`${this.apiUrl}/history`);
   }

@@ -20,16 +20,18 @@
 
       <nav class="sidebar-nav">
         @for (item of navItems; track item.route) {
-          <a
-            [id]="item.id"
-            class="nav-item"
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [title]="sidebarCollapsed() ? item.label : ''"
-          >
-            <span class="nav-icon">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </a>
+          @if (!item.adminOnly || authService.isAdmin()) {
+            <a
+              [id]="item.id"
+              class="nav-item"
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              [title]="sidebarCollapsed() ? item.label : ''"
+            >
+              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+          }
         }
       </nav>
 
