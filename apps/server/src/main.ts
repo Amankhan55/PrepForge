@@ -22,6 +22,7 @@ async function bootstrap() {
   const allowedOrigins = [
     'http://localhost:4200',
     'http://localhost:3000',
+    'https://prep-forge-delta.vercel.app',
   ];
   if (clientUrl) {
     allowedOrigins.push(clientUrl);
