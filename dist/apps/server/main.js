@@ -1969,8 +1969,31 @@ async function bootstrap() {
         transform: true,
     }));
     app.use((0, cookie_parser_1.default)());
+    const clientUrl = process.env['CLIENT_URL'];
+    const allowedOrigins = [
+        'http://localhost:4200',
+        'http://localhost:3000',
+    ];
+    if (clientUrl) {
+        allowedOrigins.push(clientUrl);
+    }
     app.enableCors({
-        origin: process.env['CLIENT_URL'] || 'http://localhost:4200',
+        origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps, curl, or server-to-server calls)
+            if (!origin) {
+                return callback(null, true);
+            }
+            const isAllowed = allowedOrigins.some(allowed => {
+                // Compare case-insensitively and strip trailing slashes to prevent configuration typos
+                return allowed.toLowerCase().replace(/\/$/, '') === origin.toLowerCase().replace(/\/$/, '');
+            });
+            if (isAllowed) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error(`Origin ${origin} not allowed by CORS`));
+            }
+        },
         credentials: true,
     });
     const port = process.env['PORT'] || 3000;
