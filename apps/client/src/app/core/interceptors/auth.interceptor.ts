@@ -6,8 +6,15 @@ import { catchError, switchMap, throwError } from 'rxjs';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
 
+  let url = req.url;
+  // If running on production (Vercel), automatically rewrite localhost API requests to the live Render URL
+  if (!window.location.hostname.includes('localhost') && url.startsWith('http://localhost:3000')) {
+    url = url.replace('http://localhost:3000', 'https://prepforge-api-9th2.onrender.com');
+  }
+
   // Set withCredentials for all requests to ensure cookies are sent with cross-origin requests
   const authReq = req.clone({
+    url,
     withCredentials: true,
   });
 
