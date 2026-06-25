@@ -5,7 +5,8 @@ import { UserProgress, ProgressSummary } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class ProgressService {
-  private apiUrl = 'http://localhost:3000/api/progress';
+  // private apiUrl = 'http://localhost:3000/api/progress';
+  private apiUrl = 'https://prepforge-api-9th2.onrender.com/api/progress';
 
   constructor(private http: HttpClient) {}
 
