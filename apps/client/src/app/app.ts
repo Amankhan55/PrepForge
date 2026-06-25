@@ -13,6 +13,7 @@ import { AuthService } from './core/services/auth.service';
 export class App {
   title = 'PrepForge';
   sidebarCollapsed = signal(false);
+  theme = signal<'light' | 'dark'>('dark');
 
   navItems = [
     { label: 'Dashboard', icon: '⊞', route: '/dashboard', id: 'nav-dashboard' },
@@ -28,10 +29,32 @@ export class App {
   constructor(
     public authService: AuthService,
     private router: Router,
-  ) {}
+  ) {
+    const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
+    this.theme.set(savedTheme);
+    this.applyTheme(savedTheme);
+  }
 
   toggleSidebar() {
     this.sidebarCollapsed.update((v) => !v);
+  }
+
+  toggleTheme() {
+    const nextTheme = this.theme() === 'dark' ? 'light' : 'dark';
+    this.theme.set(nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    this.applyTheme(nextTheme);
+  }
+
+  private applyTheme(theme: 'light' | 'dark') {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    } else {
+      root.classList.add('light');
+      root.classList.remove('dark');
+    }
   }
 
   logout() {

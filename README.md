@@ -130,7 +130,11 @@ User access is strictly enforced based on roles (`'user'` or `'admin'`):
    npm install
    ```
 
-2. Start the server and client separately:
+2. Start both the server and client in parallel:
+   ```bash
+   npm run dev
+   ```
+   Or start them separately:
    ```bash
    npm run dev:server
    npm run dev:client
