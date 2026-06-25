@@ -7,7 +7,8 @@ import { AuthResponse, User } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  // private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = 'https://prepforge-api-9th2.onrender.com/api/auth';
 
   private _user = signal<User | null>(this.loadUser());
   private isRefreshing = false;
