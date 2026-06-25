@@ -69,11 +69,12 @@ export class AuthController {
 
   private setCookies(res: Response, accessToken: string, refreshToken: string) {
     const isProd = process.env['NODE_ENV'] === 'production';
+    const sameSiteVal = isProd ? 'none' : 'lax';
     
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'lax',
+      sameSite: sameSiteVal,
       path: '/',
       maxAge: 15 * 60 * 1000, // 15 mins
     });
@@ -81,7 +82,7 @@ export class AuthController {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'lax',
+      sameSite: sameSiteVal,
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -89,17 +90,18 @@ export class AuthController {
 
   private clearCookies(res: Response) {
     const isProd = process.env['NODE_ENV'] === 'production';
+    const sameSiteVal = isProd ? 'none' : 'lax';
     
     res.clearCookie('access_token', {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'lax',
+      sameSite: sameSiteVal,
       path: '/',
     });
     res.clearCookie('refresh_token', {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'lax',
+      sameSite: sameSiteVal,
       path: '/',
     });
   }

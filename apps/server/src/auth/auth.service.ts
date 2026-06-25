@@ -23,7 +23,6 @@ export class AuthService {
     const user = await this.usersService.create(dto.name, dto.email, passwordHash, role);
 
     const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
 
     return { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role }, ...tokens };
   }
@@ -36,7 +35,6 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
     const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
 
     return { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role }, ...tokens };
   }
@@ -49,7 +47,6 @@ export class AuthService {
     if (!match) throw new UnauthorizedException();
 
     const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
-    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
     return tokens;
   }
 
