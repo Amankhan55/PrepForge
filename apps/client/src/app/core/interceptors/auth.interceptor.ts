@@ -29,11 +29,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       ) {
         return authService.refreshToken().pipe(
           switchMap(() => {
-            // Retry the original request with credentials
-            const retryReq = req.clone({
-              withCredentials: true,
-            });
-            return next(retryReq);
+            // Retry the original request with credentials and correct URL
+            return next(authReq);
           }),
           catchError((refreshError) => {
             // If the refresh token is expired/invalid, clear session and redirect to login

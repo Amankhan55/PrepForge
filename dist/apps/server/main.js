@@ -226,33 +226,35 @@ let AuthController = class AuthController {
     }
     setCookies(res, accessToken, refreshToken) {
         const isProd = process.env['NODE_ENV'] === 'production';
+        const sameSiteVal = isProd ? 'none' : 'lax';
         res.cookie('access_token', accessToken, {
             httpOnly: true,
             secure: isProd,
-            sameSite: 'lax',
+            sameSite: sameSiteVal,
             path: '/',
             maxAge: 15 * 60 * 1000, // 15 mins
         });
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
             secure: isProd,
-            sameSite: 'lax',
+            sameSite: sameSiteVal,
             path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
     }
     clearCookies(res) {
         const isProd = process.env['NODE_ENV'] === 'production';
+        const sameSiteVal = isProd ? 'none' : 'lax';
         res.clearCookie('access_token', {
             httpOnly: true,
             secure: isProd,
-            sameSite: 'lax',
+            sameSite: sameSiteVal,
             path: '/',
         });
         res.clearCookie('refresh_token', {
             httpOnly: true,
             secure: isProd,
-            sameSite: 'lax',
+            sameSite: sameSiteVal,
             path: '/',
         });
     }
@@ -344,7 +346,6 @@ let AuthService = class AuthService {
         const role = (dto.role === 'admin' || dto.email.toLowerCase() === 'admin@prepforge.com') ? 'admin' : 'user';
         const user = await this.usersService.create(dto.name, dto.email, passwordHash, role);
         const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
         return { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role }, ...tokens };
     }
     async login(dto) {
@@ -355,7 +356,6 @@ let AuthService = class AuthService {
         if (!valid)
             throw new common_1.UnauthorizedException('Invalid credentials');
         const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
         return { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role }, ...tokens };
     }
     async refresh(userId, refreshToken) {
@@ -366,7 +366,6 @@ let AuthService = class AuthService {
         if (!match)
             throw new common_1.UnauthorizedException();
         const tokens = await this.generateTokens(user._id.toString(), user.email, user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
         return tokens;
     }
     async refreshWithToken(refreshToken) {
